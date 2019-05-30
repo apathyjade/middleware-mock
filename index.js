@@ -21,6 +21,7 @@ const config = Object.assign({
   }
 }, require(path.resolve(cwd, '.mock.config')))
 
+// 处理 callback 为 Array 类型
 if (typeof config.callback === 'string') {
   config.callback = [config.callback]
 }
