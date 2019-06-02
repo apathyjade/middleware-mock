@@ -1,6 +1,6 @@
 {
   "name": "middleware-mock",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "本地开发的数据mock中间件",
   "main": "index.js",
   "scripts": {
@@ -18,5 +18,8 @@
   "bugs": {
     "url": "https://github.com/apathyjade/middleware-mock/issues"
   },
-  "homepage": "https://github.com/apathyjade/middleware-mock#readme"
+  "homepage": "https://github.com/apathyjade/middleware-mock#readme",
+  "dependencies": {
+    "json5": "^2.1.0"
+  }
 }

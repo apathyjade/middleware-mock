@@ -9,26 +9,41 @@
 const path = require('path')
 const url = require('url')
 const qs = require('querystring')
+require('json5/lib/register')
 
 const cwd = process.cwd()
-
+const noop = function () {}
 // 初始化配置
-let initCfg
+let initCfg = noop
 
 // 获取配置文件 没有则先初始化
 const getCfg = (() => {
   let config = null
-  initCfg = () => {
-    config = Object.assign({
-      path: path.resolve(cwd, 'mock'),
+  initCfg = (params) => {
+    let cfgPath = path.resolve(cwd, '.mock.config')
+    let defCfg = {
+      cfgPath: path.resolve(cwd, '.mock.config'),
+      filePath: path.resolve(cwd, 'mock'),
       callback: ['callback', 'jsonpCallback'],
       hooks: {}
-    }, require(path.resolve(cwd, '.mock.config')))
-    
+    }
+
+    if (typeof params === 'object') {
+      cfgPath = ''
+      config = Object.assign(defCfg, params)
+      return
+    } else {
+      if (typeof params === 'string') {
+        cfgPath = params
+      }
+      config = Object.assign(defCfg, require(cfgPath))
+    }
+
     // 处理 callback 为 Array 类型
     if (typeof config.callback === 'string') {
       config.callback = [config.callback]
     }
+
   }
   return () => {
     if (!config) {
@@ -48,12 +63,30 @@ const delay = (fn, t = 400) => {
 // 通过path 获取 mock数据
 const getFileByPath = uriPath => {
   const config = getCfg()
-  const mockPath = path.resolve(config.path, config.map[uriPath] || `.${uriPath}`)
+  const mockPath = path.resolve(config.filePath, config.map[uriPath] || `.${uriPath}`)
   try {
-    let backData = require(mockPath)
+    let backData
+    try {
+      backData = require(mockPath)
+    } catch (e) {
+      // console.log(e)
+    }
+    
     // 解决模块加载会有缓存问题， 每次清除cache
     let cachePath = require.resolve(mockPath)
-    require.cache[cachePath] && delete require.cache[cachePath]
+    if (require.cache[cachePath]) {
+      // 清除模块缓存
+      delete require.cache[cachePath]
+      // 清除模块path缓存 然并卵
+      // Object.keys(module.constructor._pathCache).forEach(function(cacheKey) {
+      //   if (cachePath === module.constructor._pathCache[cacheKey]) {
+      //     delete module.constructor._pathCache[cacheKey];
+          
+      //   }
+      // })
+      console.log(require.toString())
+    }
+
     return backData
   } catch (e) {
     // 没有mock数据时返回
@@ -96,6 +129,7 @@ function mock (req, res) {
     data = data(req, res)
   }
 
+  // 支持 promise
   data instanceof Promise ? data.then(dealData) : dealData(data)
 
   function dealData (data) {

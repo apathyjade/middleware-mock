@@ -7,7 +7,7 @@
  */
 const path = require('path')
 module.exports = {
-  path: path.resolve(__dirname, 'test/mock'),
+  filePath: path.resolve(__dirname, 'test/mock'),
   map: {
     // 获取绑定银行卡列表
     '/api/pay/bank-card/bind/list/get': './a.json'
