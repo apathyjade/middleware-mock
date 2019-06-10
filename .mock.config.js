@@ -15,7 +15,6 @@ module.exports = {
   callback: ['a', 'asd'],
   hooks: {
     dealPath (path) {
-      console.log(path)
       return path + '.json'
     },
     dealData (data) {

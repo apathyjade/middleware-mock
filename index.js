@@ -24,20 +24,31 @@ const getCfg = (() => {
     let defCfg = {
       cfgPath: path.resolve(cwd, '.mock.config'),
       filePath: path.resolve(cwd, 'mock'),
+      map: {},
       callback: ['callback', 'jsonpCallback'],
       hooks: {}
     }
-
+    let setCfg = null
     if (typeof params === 'object') {
       cfgPath = ''
-      config = Object.assign(defCfg, params)
-      return
-    } else {
-      if (typeof params === 'string') {
+      setCfg = params
+      // config = Object.assign(defCfg, params)
+      // return
+    } else if (typeof params === 'string') {
+      try {
         cfgPath = params
+        setCfg = require(cfgPath)
+        config = Object.assign(defCfg, require(cfgPath))
+      } catch (e) {
+        throw new Error(`${cfgPath} is no existed`)
       }
-      config = Object.assign(defCfg, require(cfgPath))
+      
+    } else {
+      try {
+        setCfg = require(cfgPath)
+      } catch (e) {}
     }
+    config = Object.assign(defCfg, setCfg)
 
     // 处理 callback 为 Array 类型
     if (typeof config.callback === 'string') {
@@ -69,23 +80,13 @@ const getFileByPath = uriPath => {
     let backData
     try {
       backData = require(mockPath)
-    } catch (e) {
-      // console.log(e)
-    }
+    } catch (e) {}
     
     // 解决模块加载会有缓存问题， 每次清除cache
     let cachePath = require.resolve(mockPath)
     if (require.cache[cachePath]) {
       // 清除模块缓存
       delete require.cache[cachePath]
-      // 清除模块path缓存 然并卵
-      // Object.keys(module.constructor._pathCache).forEach(function(cacheKey) {
-      //   if (cachePath === module.constructor._pathCache[cacheKey]) {
-      //     delete module.constructor._pathCache[cacheKey];
-          
-      //   }
-      // })
-      console.log(require.toString())
     }
 
     return backData

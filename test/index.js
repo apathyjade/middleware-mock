@@ -9,6 +9,15 @@
 const http = require('http');
 const mock = require('../index')
 
+mock.initCfg({
+  filePath: './test/mock',
+  map: {},
+  callback: [],
+  hooks: {
+    
+  }
+})
+
 // Create an HTTP server
 const server = http.createServer((req, res) => {
   mock(req, res)
