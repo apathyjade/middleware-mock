@@ -64,3 +64,48 @@ module.exports = {
   }
 }
 ```
+
+### mock file
+
+支持json、json5、js, 无后缀时优先级：js > json > json5
+
+#### js mock 说明
+
+```javascript
+// example 1
+module.exports = 'mock'
+module.exports = {name: 'mock'}
+
+// example 2 异步 promise 支持
+module.exports = async function (req, res) {
+  return new Promise((r) => {
+    setTimeout(() => {
+      r('1qqqqwqw')
+    }, 200)
+  })
+}
+
+// example 3 直接操作 req 和 res 对象
+module.exports = function (req, res) {
+  res.end('结束')
+}
+
+```
+
+#### json mock 说明
+
+```json
+{
+  "key": "name"
+}
+```
+
+#### json5 mock 说明
+
+```json5
+// 配置说明
+{
+  // 定义的key
+  key: 'name' // 注释
+}
+```
