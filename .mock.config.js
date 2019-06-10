@@ -10,10 +10,17 @@ module.exports = {
   filePath: path.resolve(__dirname, 'test/mock'),
   map: {
     // 获取绑定银行卡列表
-    '/api/pay/bank-card/bind/list/get': './a.json'
+    '/api/pay/bank-card/bind/list/get.json': './a.json'
   },
   callback: ['a', 'asd'],
   hooks: {
-
+    dealPath (path) {
+      console.log(path)
+      return path + '.json'
+    },
+    dealData (data) {
+      data.asd = 123
+      return data
+    }
   }
 }

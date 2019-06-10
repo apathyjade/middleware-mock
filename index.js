@@ -63,7 +63,8 @@ const delay = (fn, t = 400) => {
 // 通过path 获取 mock数据
 const getFileByPath = uriPath => {
   const config = getCfg()
-  const mockPath = path.resolve(config.filePath, config.map[uriPath] || `.${uriPath}`)
+  const {dealPath = path => path} = config.hooks
+  const mockPath = path.resolve(config.filePath, config.map[dealPath(uriPath)] || `.${dealPath(uriPath)}`)
   try {
     let backData
     try {
@@ -133,7 +134,9 @@ function mock (req, res) {
   data instanceof Promise ? data.then(dealData) : dealData(data)
 
   function dealData (data) {
-    data = dealMock2Str(data)
+    const config = getCfg()
+    const {dealData = data => data} = config.hooks
+    data = dealMock2Str(dealData(data))
     
     // 由于 mock 数据同步获取到 返回过快的话 前端的异步效果会同步既视感  这里做一个，异步延迟返回
     delay(() => {
