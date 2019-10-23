@@ -9,7 +9,8 @@
 const path = require('path')
 const url = require('url')
 const qs = require('querystring')
-const fs = require("fs");
+const fs = require('fs')
+const mime = require('mime')
 require('json5/lib/register')
 
 const cwd = process.cwd()
@@ -74,7 +75,14 @@ const delay = (fn, t = 400) => {
 const getFilePath = uriPath => {
   const config = getCfg()
   const {dealPath = path => path} = config.hooks
-  return path.resolve(config.filePath, config.map[dealPath(uriPath)] || `.${dealPath(uriPath)}`)
+  return path.resolve(config.filePath, './' + (config.map[dealPath(uriPath)] || dealPath(uriPath)))
+}
+const get404Res = (mockPath, uriPath) => {
+  return {
+    type: 'mock',
+    code: 404,
+    msg: `'${path.resolve(mockPath)}' of '${uriPath}' mock is not existential`
+  }
 }
 // 通过path 获取 mock数据
 const getFileByPath = (uriPath, mockPath) => {
@@ -94,11 +102,7 @@ const getFileByPath = (uriPath, mockPath) => {
     return backData
   } catch (e) {
     // 没有mock数据时返回
-    return {
-      type: 'mock',
-      code: 404,
-      msg: `'${path.resolve(mockPath)}' of '${uriPath}' mock is not existential`
-    }
+    return get404Res(mockPath, uriPath)
   }
 }
 
@@ -129,7 +133,9 @@ function mock (req, res) {
   const filePath = getFilePath(urlObj.pathname)
   if (!['', '.js', '.json', '.json5'].includes(path.extname(filePath))) {
     fs.readFile(filePath, (err, data) => {
-      res.end(data)
+      res.end(!err 
+        ? data
+        : dealMock2Str(get404Res(filePath, urlObj.pathname)))
     })
     return
   }

@@ -8,10 +8,12 @@
 
 const http = require('http');
 const mock = require('../index')
-
+const path = require('path')
 mock.initCfg({
-  filePath: './test/mock',
-  map: {},
+  filePath: path.resolve('./test/mock'),
+  map: {
+    '/png': '/png.png'
+  },
   callback: [],
   hooks: {
     
