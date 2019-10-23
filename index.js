@@ -9,6 +9,7 @@
 const path = require('path')
 const url = require('url')
 const qs = require('querystring')
+const fs = require("fs");
 require('json5/lib/register')
 
 const cwd = process.cwd()
@@ -70,12 +71,13 @@ const delay = (fn, t = 400) => {
     fn()
   }, t)
 }
-
-// 通过path 获取 mock数据
-const getFileByPath = uriPath => {
+const getFilePath = uriPath => {
   const config = getCfg()
   const {dealPath = path => path} = config.hooks
-  const mockPath = path.resolve(config.filePath, config.map[dealPath(uriPath)] || `.${dealPath(uriPath)}`)
+  return path.resolve(config.filePath, config.map[dealPath(uriPath)] || `.${dealPath(uriPath)}`)
+}
+// 通过path 获取 mock数据
+const getFileByPath = (uriPath, mockPath) => {
   try {
     let backData
     try {
@@ -123,8 +125,17 @@ function mock (req, res) {
   const urlObj = url.parse(req.url)
   const params = qs.parse(urlObj.query)
   const config = getCfg()
+
+  const filePath = getFilePath(urlObj.pathname)
+  if (!['', '.js', '.json', '.json5'].includes(path.extname(filePath))) {
+    fs.readFile(filePath, (err, data) => {
+      res.end(data)
+    })
+    return
+  }
+
   // 读取本地 mock 文件内容
-  let data = getFileByPath(urlObj.pathname)
+  let data = getFileByPath(urlObj.pathname, filePath)
 
   // mock 配置是动态方法时 先执行脚本
   if (typeof data === 'function') {
