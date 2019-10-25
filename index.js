@@ -10,7 +10,6 @@ const path = require('path')
 const url = require('url')
 const qs = require('querystring')
 const fs = require('fs')
-const mime = require('mime')
 require('json5/lib/register')
 
 const cwd = process.cwd()
@@ -34,29 +33,30 @@ const getCfg = (() => {
     if (typeof params === 'object') {
       cfgPath = ''
       setCfg = params
-      // config = Object.assign(defCfg, params)
-      // return
-    } else if (typeof params === 'string') {
-      try {
+    } else {
+      if (typeof params === 'string') {
         cfgPath = params
+      }
+      if (
+        !fs.existsSync(cfgPath)
+        && !fs.existsSync(cfgPath + '.js')
+        && !fs.existsSync(cfgPath + '.json')
+      ) {
+        if (typeof params === 'string') {
+          throw new Error(`config file '${cfgPath}' is no existed`)
+        }
+        setCfg = {}
+      } else {
         setCfg = require(cfgPath)
-        config = Object.assign(defCfg, require(cfgPath))
-      } catch (e) {
-        throw new Error(`${cfgPath} is no existed`)
       }
       
-    } else {
-      try {
-        setCfg = require(cfgPath)
-      } catch (e) {}
     }
-    config = Object.assign(defCfg, setCfg)
+    config = Object.assign({}, defCfg, setCfg)
 
     // 处理 callback 为 Array 类型
     if (typeof config.callback === 'string') {
       config.callback = [config.callback]
     }
-
   }
   return () => {
     if (!config) {

@@ -9,6 +9,7 @@
 const http = require('http');
 const mock = require('../index')
 const path = require('path')
+// mock.initCfg(path.resolve(__dirname, '../.mock.config'))
 mock.initCfg({
   filePath: path.resolve('./test/mock'),
   map: {
