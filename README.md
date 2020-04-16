@@ -6,7 +6,7 @@
 
 ``` shell
 
-npm install middleware-mock -S
+npm install middleware-mock -D
 
 ```
 
